@@ -9,7 +9,6 @@
   - [1-2: 繰り返し](#1-2-繰り返し)
 - [Chapter 2: 基本的なデータ構造](#chapter-2-基本的なデータ構造)
   - [2-1: 配列](#2-1-配列)
-  - [2-2: テストと検証](#2-2-テストと検証)
 - [Chapter 3: ドキュメントと資産化](#chapter-3-ドキュメントと資産化)
   - [3-1: 学びの整理](#3-1-学びの整理)
   - [3-2: 再利用可能なアウトプット](#3-2-再利用可能なアウトプット)
@@ -218,17 +217,162 @@ int main() {
 ```
 ---
 
-## Chapter 2: 実装と応用
+## Chapter 2: 基本的なデータ構造
 
-### 2-1: コードの実装
-- 言語とアルゴリズム
-- 実装時の工夫や解説
-- 関数ごとのコメントや構造整理
+### 2-1: 配列
+データ構造とは要素同士に何らかの関係があるもの。  
+そのひとつとしてここでは配列を扱う。  
+C言語では配列の宣言時に要素数を変数にすることはできない。  
+そのため要素数を標準入力から得た値にする場合は記憶域を動的に確保する必要がある。  
+関数に配列を渡すときは配列名のみ、すなわち先頭要素のポインタと要素数を渡せばよい。  
+`const`をつけると読み込みのみ可能で書き込み不可となる。  
 
-### 2-2: テストと検証
-- テストケースと実行例
-- 結果の考察
-- 改善点や最適化案
+```C
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+
+#define N 5 /*配列の要素数*/
+
+/*要素数nの配列の最大値を返す関数*/
+int maxn(const int a[], int n) {
+	int max, i;
+	max = a[0];
+	for (i = 1; i < n; i++) {
+		if (max < a[i]) max = a[i];
+	}
+	return max;
+}
+
+int main() {
+
+	/*要素数５の配列に入力・表示*/
+	int i;
+	int a[N];
+	for (i = 0; i < N; i++) {
+		printf("a[%d]：", i); scanf_s("%d", &a[i]);
+	}
+	for (i = 0; i < N; i++) {
+		printf("a[%d]=%d\n", i, a[i]);
+	}
+
+	/*配列を初期化して表示*/
+	int b[] = { 0,2,4,6,8,10 };
+	int s = sizeof(b) / sizeof(b[0]); /*要素数*/
+	for (i = 0; i < s; i++) {
+		printf("b[%d]=%d\n", i, b[i]);
+	}
+
+	/*int型のオブジェクトを動的に生成して表示したのち破棄*/
+	int* x;
+	x = calloc(1, sizeof(int));
+	if (x == NULL)
+		puts("記憶域の確保に失敗しました。");
+	else {
+		*x = 57;
+		printf("%d\n", *x);
+		free(x);
+	}
+
+	/*int型の配列を動的に生成して表示したのち破棄*/
+	int na;
+	printf("確保する配列の要素数："); scanf_s("%d", &na);
+	int* y;
+	y = calloc(na, sizeof(int));
+	if (y == NULL)
+		puts("記憶域の確保に失敗しました。");
+	else {
+		for (i = 0; i < na; i++) {
+			printf("y[%d]:", i); scanf_s("%d", &y[i]);
+		}
+		for (i = 0; i < na; i++) {
+			printf("y[%d]=%d\n", i, y[i]);
+		}
+		free(y);
+	}
+
+	/*n人の身長を入力し最大値を返す(関数で)*/
+	int n;
+	printf("何人の身長を入力しますか？"); scanf_s("%d", &n);
+	int* height;
+	height = calloc(n, sizeof(int));
+	if (height == NULL)
+		puts("記憶域の確保に失敗しました。");
+	else {
+		for (i = 0; i < n; i++) {
+			printf("%d人目の身長：", i + 1);
+			scanf_s("%d", &height[i]);
+		}
+		printf("身長の最大値は%dです。\n", maxn(height, n));
+		free(height);
+	}
+
+	/*乱数で身長をを作成し最大値を求める*/
+	int n2;
+	int* height2;
+	printf("何人の身長を入力しますか？："); scanf_s("%d", &n2);
+	height2 = calloc(n2, sizeof(int));
+	if (height2 == NULL)
+		puts("記憶域の確保に失敗しました。");
+	else {
+		srand(time(NULL));
+		for (i = 0; i < n2; i++) {
+			height2[i] = 100 + rand() % 100;
+			printf("%d人目の身長：%d\n", i + 1, height2[i]);
+		}
+		printf("最大値は%dです。\n", maxn(height2, n2));
+		free(height2);
+	}
+	return 0;
+}
+```
+**関数名の由来**  
+`malloc`：memory allocation(メモリ割り当て)  
+`calloc`：contiguous allocation(連続メモリ割り当て)  
+
+
+続いて配列要素を反転するアルゴリズム。  
+左右の端からスワップしていけばよい。  
+スワップの実行回数はn/2である。これはnの偶奇によらない。  
+プログラムをかけるよりも図を書いてこの操作で条件を満足することを確認する方が重要な気がする。   
+関数形式マクロを用いるとプログラムが短くなり読みやすい。  
+コンパイル時に呼び出した部分がマクロに書いた処理に展開される。  
+`do{} while(0)`ではループの条件を満たさないので中の処理が1度のみ実行される。  
+普通に書いてmain関数内で展開されるとifとelseの間に空文；ができてifとelseがつながっていないことになる。
+
+```C
+#include<stdio.h>
+#include<stdlib.h>
+
+/*関数内で一次保存用のtmpを確保する必要があるがその型は不明→引数に*/
+/*関数形式マクロ*/
+#define swap(type,x,y) do{type tmp; tmp=x; x=y; y=tmp;} while(0)
+
+/*配列の要素を反転する関数*/
+void ary_reverse(int a[], int n) {
+	int i;
+	for (i = 0; i < (n / 2); i++) {
+		swap(int, a[i], a[n - i - 1]);
+	}
+}
+
+int main() {
+	/*配列の要素を反転*/
+	int n3;
+	printf("配列の要素数："); scanf_s("%d", &n3);
+	int* c;
+	c = calloc(n3, sizeof(int));
+	for (i = 0; i < n3; i++) {
+		printf("c[%d]=", i); scanf_s("%d", &c[i]);
+	}
+	puts("反転しました。");
+	ary_reverse(c, n3);
+	for (i = 0; i < n3; i++) {
+		printf("c[%d]=%d\n", i, c[i]);
+	}
+	return 0;
+}
+```
 
 ---
 
