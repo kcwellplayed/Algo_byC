@@ -374,6 +374,69 @@ int main() {
 }
 ```
 
+
+次は10進数を任意の基数に変換するアルゴリズム。  
+基数で割っていきその剰余が右から並んでいく方法をプログラム化する。  
+`digits++`の`++`は後置増分演算子といって、評価されたのちにインクリメントされる。  
+`++digits`とすれば前置増分演算子といって、インクリメントされたのちに評価される。  
+文字列`dchar`を準備しているのは11以上の基数に対応するためである。  
+基数が10以下であれば剰余を直接配列に格納すれば良いが、10以上の剰余はアルファベットで表記するため、  
+このような形をとっている。  
+書式指定子に注意。  
+
+```C
+#include<stdio.h>
+#include<stdlib.h>
+
+#define swap(type,x,y) do{type tmp; tmp=x; x=y; y=tmp;} while(0) 
+
+/*配列の要素を反転する関数*/
+void ary_reverse(char d[], int n) {
+	int i;
+	for (i = 0; i < n / 2; i++) {
+		swap(char, d[i], d[n - i - 1]);
+	}
+}
+
+/*10進数を任意の基数(2-36)に変換する関数*/
+/*答えを格納する配列を関数に渡す。返り値は桁数。*/
+/*非負整数xをn進数に変換し文字列dに格納*/
+int card_conver(unsigned x, int n, char d[]) {
+	char dchar[] = "0123456789ABCDEFGHIJKLMNOPQRSTUYWXYZ";
+	int digits = 0;
+	if (x == 0)
+		d[digits++] = dchar[0];
+	else {
+		while (x > 0) {
+			d[digits++] = dchar[x % n];
+			x /= n;
+		}
+	}
+	ary_reverse(d, digits);
+	return digits;
+}
+
+int main() {
+	unsigned x;
+		printf("非負整数を入力："); scanf_s("%u", &x);
+
+	int n;
+	do {
+		printf("何進数に変換？："); scanf_s("%d", &n);
+	} while (n <= 1 || n>32);
+
+	int i, digits;
+	char d[512]; /*サイズわからないので大きめに*/
+	digits = card_conver(x, n, d);
+	printf("%uを%d進数に変換すると", x, n);
+	for (i = 0; i < digits; i++) {
+		printf("%c", d[i]);
+	}
+	puts("です。");
+
+	return 0;
+}
+```
 ---
 
 ## Chapter 3: ドキュメントと資産化
